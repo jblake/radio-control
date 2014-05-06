@@ -51,7 +51,7 @@ deriveJSON (defaultOptions {sumEncoding = ObjectWithSingleField}) ''APIRequest
 deriveJSON (defaultOptions {sumEncoding = ObjectWithSingleField}) ''APIResponse
 
 app :: APIRequest -> IO APIResponse
-app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
+app req = handle (\e -> return $ APIError $ show (e :: SomeException)) $ do
   sock <- socket AF_UNIX Stream 0
   connect sock $ SockAddrUnix "/srv/radio/run/socket"
   liquidSoap <- socketToHandle sock ReadWriteMode
