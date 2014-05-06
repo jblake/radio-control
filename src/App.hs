@@ -96,11 +96,11 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
       info <- readMap liquidSoap
 
       let
-	status = M.findWithDefault "" "status" info
+	status = M.findWithDefault "<unknown>" "status" info
 
       if (status == "ready" || status == "playing")
 	then return WorkedFine
-	else return $ APIError "Invalid track."
+	else return $ APIError $ "Invalid track. (status=" ++ status ++ ")"
 
     SkipThisSong -> do
       hPutStrLn liquidSoap "icecast.skip"
