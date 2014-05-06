@@ -16,7 +16,6 @@ import Data.Aeson
 import Data.Aeson.TH
 import Data.Char
 import qualified Data.Map as M
-import Data.Maybe
 import Network.Socket
 import System.IO
 
@@ -71,12 +70,15 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
 	title = M.findWithDefault "<unknown>" "title" info
 	artist = M.findWithDefault "<unknown>" "artist" info
 	album = M.findWithDefault "<unknown>" "album" info
-	remaining = fromJust $ (do
-	  x <- read <$> M.lookup "remaining" info
-	  let
-	    (tmin, tsec) = x `divMod` (60 :: Int)
-	  return $ show tmin ++ "m" ++ show tsec ++ "s"
-	  ) <|> Just "<unknown>"
+
+      hPutStrLn liquidSoap "icecast.remaining"
+      seconds <- read <$> hGetLine liquidSoap
+      "END" <- hGetLine liquidSoap
+
+      let
+	tmin = floor $ seconds / (60 :: Double) :: Int
+	tsec = floor $ seconds - (fromIntegral $ tmin * 60) :: Int
+	remaining = show tmin ++ "m" ++ show tsec ++ "s"
       return $ NowPlaying {..}
 
   resp <- case req of
