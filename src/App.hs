@@ -12,6 +12,7 @@ where
 import Control.Applicative
 import Control.Exception
 import Codec.Binary.UTF8.String
+import Data.Aeson
 import Data.Aeson.TH
 import Data.Char
 import qualified Data.Map as M
@@ -20,7 +21,7 @@ import System.IO
 import System.Process
 
 data APIRequest
-  = CurrentMetadata
+  = CurrentMetadata Value
   | SongsMatching
     { subpath :: String
     }
@@ -28,13 +29,13 @@ data APIRequest
     { path :: String
     }
   | SkipThisSong
-  deriving (Read, Show)
+  deriving (Show)
 
 data APIResponse
   = APIError
     { message :: String
     }
-  | WorkedFine
+  | WorkedFine Value
   | NowPlaying
     { filename :: String
     , title :: String
@@ -45,7 +46,7 @@ data APIResponse
   | SearchResults
     { paths :: [String]
     }
-  deriving (Read, Show)
+  deriving (Show)
 
 deriveJSON (defaultOptions {sumEncoding = ObjectWithSingleField}) ''APIRequest
 deriveJSON (defaultOptions {sumEncoding = ObjectWithSingleField}) ''APIResponse
@@ -59,7 +60,7 @@ app req = handle (\e -> return $ APIError $ show (e :: SomeException)) $ do
 
   resp <- case req of
 
-    CurrentMetadata -> do
+    CurrentMetadata _ -> do
       hPutStrLn liquidSoap "request.on_air"
       song_id <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
@@ -99,14 +100,14 @@ app req = handle (\e -> return $ APIError $ show (e :: SomeException)) $ do
 	status = M.findWithDefault "<unknown>" "status" info
 
       if (status == "ready" || status == "playing")
-	then return WorkedFine
+	then return $ WorkedFine $ object []
 	else return $ APIError $ "Invalid track. (status=" ++ status ++ ")"
 
     SkipThisSong -> do
       hPutStrLn liquidSoap "icecast.skip"
       "Done" <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
-      return WorkedFine
+      return $ WorkedFine $ object []
 
   hPutStrLn liquidSoap "quit"
   "Bye!" <- hGetLine liquidSoap
