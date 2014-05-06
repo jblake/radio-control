@@ -95,7 +95,7 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
       nowPlaying
 
     SkipThisSong -> do
-      hPutStrLn liquidSoap "alsa.skip"
+      hPutStrLn liquidSoap "icecast.skip"
       "Done" <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
 
