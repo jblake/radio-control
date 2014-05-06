@@ -85,7 +85,7 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
     SongsMatching {..} -> fail "not yet supported"
 
     AddToQueue {..} -> do
-      hPutStrLn liquidSoap $ "queue.push \"" ++ exportString path ++ "\""
+      hPutStrLn liquidSoap $ "queue.push " ++  path
       song_id <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
 
@@ -120,14 +120,3 @@ importString str = decodeString $ unescape str
     unescape (c:cs) = c : unescape cs
 
     octalDigitsToInt ds = sum $ [ digitToInt d * 8 ^ (i :: Int) | d <- reverse ds | i <- [0..] ]
-
-exportString :: String -> String
-exportString str = escape $ encodeString str
-  where
-    escape "" = ""
-    escape (c:cs) | c >= ' ' && c <= '~' && c /= '"' && c /= '\\' = c : escape cs
-		  | otherwise = '\\' : intToDigit x : intToDigit y : intToDigit z : escape cs
-		    where
-		      c' = ord c
-		      (x, x') = c' `divMod` 64
-		      (y, z) = x' `divMod` 8
