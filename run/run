@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec spawn-fcgi -M 0777 -n -s fcgi -- ../radio-control
