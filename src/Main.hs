@@ -55,6 +55,7 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
   sock <- socket AF_UNIX Stream 0
   connect sock $ SockAddrUnix "/srv/radio/run/socket"
   liquidSoap <- socketToHandle sock ReadWriteMode
+  hSetNewlineMode liquidSoap $ NewlineMode CRLF CRLF
 
   let
     nowPlaying = do
