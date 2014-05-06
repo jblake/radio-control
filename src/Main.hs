@@ -15,7 +15,6 @@ import Codec.Binary.UTF8.String
 import Data.Aeson
 import Data.Aeson.TH
 import Data.Char
-import Data.List
 import qualified Data.Map as M
 import Data.Maybe
 import Network.Socket
