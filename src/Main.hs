@@ -125,7 +125,7 @@ exportString :: String -> String
 exportString str = escape $ encodeString str
   where
     escape "" = ""
-    escape (c:cs) | c >= ' ' && c <= '~' && c /= '"' && c /= '\'' = c : escape cs
+    escape (c:cs) | c >= ' ' && c <= '~' && c /= '"' && c /= '\\' = c : escape cs
 		  | otherwise = '\\' : intToDigit x : intToDigit y : intToDigit z : escape cs
 		    where
 		      c' = ord c
