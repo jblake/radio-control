@@ -17,6 +17,7 @@ import Data.Char
 import qualified Data.Map as M
 import Network.Socket
 import System.IO
+import System.Process
 
 data APIRequest
   = CurrentMetadata
@@ -33,6 +34,7 @@ data APIResponse
   = APIError
     { message :: String
     }
+  | WorkedFine
   | NowPlaying
     { filename :: String
     , title :: String
@@ -55,8 +57,9 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
   liquidSoap <- socketToHandle sock ReadWriteMode
   hSetNewlineMode liquidSoap $ NewlineMode CRLF CRLF
 
-  let
-    nowPlaying = do
+  resp <- case req of
+
+    CurrentMetadata -> do
       hPutStrLn liquidSoap "request.on_air"
       song_id <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
@@ -80,25 +83,30 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
 	remaining = show tmin ++ "m" ++ show tsec ++ "s"
       return $ NowPlaying {..}
 
-  resp <- case req of
-
-    CurrentMetadata -> nowPlaying
-
-    SongsMatching {..} -> fail "not yet supported"
+    SongsMatching {..} -> do
+      paths <- lines <$> readProcess "/srv/radio/all-songs.sh" (concat [ ["-ipath", "*" ++ w ++ "*"] | w <- words subpath ]) ""
+      return $ SearchResults {..}
 
     AddToQueue {..} -> do
-      hPutStrLn liquidSoap $ "queue.push " ++  path
+      hPutStrLn liquidSoap $ "queue.push " ++ path
       song_id <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
 
-      nowPlaying
+      hPutStrLn liquidSoap $ "request.metadata " ++ song_id
+      info <- readMap liquidSoap
+
+      let
+	status = M.findWithDefault "" "status" info
+
+      if (status == "ready" || status == "playing")
+	then return WorkedFine
+	else return $ APIError "Invalid track."
 
     SkipThisSong -> do
       hPutStrLn liquidSoap "icecast.skip"
       "Done" <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
-
-      nowPlaying
+      return WorkedFine
 
   hPutStrLn liquidSoap "quit"
   "Bye!" <- hGetLine liquidSoap
