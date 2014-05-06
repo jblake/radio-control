@@ -119,7 +119,7 @@ importString str = decodeString $ unescape str
     unescape ('\\':cs) = toEnum (octalDigitsToInt $ take 3 cs) : unescape (drop 3 cs)
     unescape (c:cs) = c : unescape cs
 
-    octalDigitsToInt ds = sum $ [ digitToInt d * 8 ^ i | d <- reverse ds | i <- [0..] ]
+    octalDigitsToInt ds = sum $ [ digitToInt d * 8 ^ (i :: Int) | d <- reverse ds | i <- [0..] ]
 
 exportString :: String -> String
 exportString str = escape $ encodeString str
