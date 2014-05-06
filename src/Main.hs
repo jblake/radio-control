@@ -73,8 +73,8 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
 	remaining = fromJust $ (do
 	  x <- read <$> M.lookup "remaining" info
 	  let
-	    (min, sec) = x `divMod` 60
-	  return $ show min ++ "m" ++ show sec ++ "s"
+	    (tmin, tsec) = x `divMod` (60 :: Int)
+	  return $ show tmin ++ "m" ++ show tsec ++ "s"
 	  ) <|> Just "<unknown>"
       return $ NowPlaying {..}
 
