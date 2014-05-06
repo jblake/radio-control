@@ -59,7 +59,7 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
   let
     nowPlaying = do
       hPutStrLn liquidSoap "request.on_air"
-      song_id <- read <$> hGetLine liquidSoap
+      song_id <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
 
       hPutStrLn liquidSoap $ "request.metadata " ++ song_id
@@ -86,7 +86,7 @@ app req = handle (\e -> return $ APIError $ show (e :: IOError)) $ do
 
     AddToQueue {..} -> do
       hPutStrLn liquidSoap $ "queue.push \"" ++ exportString path ++ "\""
-      song_id <- read <$> hGetLine liquidSoap
+      song_id <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
 
       nowPlaying
