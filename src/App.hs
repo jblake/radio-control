@@ -6,13 +6,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Main
+module App
 where
 
 import Control.Applicative
 import Control.Exception
 import Codec.Binary.UTF8.String
-import Data.Aeson
 import Data.Aeson.TH
 import Data.Char
 import qualified Data.Map as M
