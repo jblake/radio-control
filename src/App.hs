@@ -28,7 +28,7 @@ data APIRequest
   | AddToQueue
     { path :: String
     }
-  | SkipThisSong
+  | SkipThisSong Value
   deriving (Show)
 
 data APIResponse
@@ -103,7 +103,7 @@ app req = handle (\e -> return $ APIError $ show (e :: SomeException)) $ do
 	then return $ WorkedFine $ object []
 	else return $ APIError $ "Invalid track. (status=" ++ status ++ ")"
 
-    SkipThisSong -> do
+    SkipThisSong _ -> do
       hPutStrLn liquidSoap "icecast.skip"
       "Done" <- hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
