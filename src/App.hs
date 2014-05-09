@@ -81,7 +81,7 @@ app req = handle (\e -> return $ APIError $ show (e :: SomeException)) $ do
       let
 	tmin = floor $ seconds / (60 :: Double) :: Int
 	tsec = floor $ seconds - (fromIntegral $ tmin * 60) :: Int
-	remaining = show tmin ++ "m" ++ show tsec ++ "s"
+	remaining = (if tmin > 0 then show tmin ++ "m" else "") ++ show tsec ++ "s"
       return $ NowPlaying {..}
 
     SongsMatching {..} -> do
