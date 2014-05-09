@@ -16,11 +16,14 @@
       <div class="row">
 	<form class="form-horizontal well col-xs-12" role="form">
 	  <div class="form-group">
-	    <div class="col-sm-12" id="currently-playing">Please wait, loading metadata...</div>
+	    <div class="col-sm-12">
+	      <span id="title"></span> by <span id="artist"></span> from <span id="album"></span> (<span id="filename"></span>)<br />
+	      Approximately <span id="remaining"></span> remaining.
+	    </div>
 	  </div>
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-10">
-	      <button type="button" class="btn btn-warning" onclick="">Skip</button>
+	      <button type="button" class="btn btn-warning" onclick="skip();">Skip</button>
 	    </div>
 	  </div>
 	</form>
@@ -35,7 +38,7 @@
 	  </div>
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-10">
-	      <button type="button" class="btn btn-primary" onclick="">Enqueue</button>
+	      <button type="button" class="btn btn-primary" onclick="enqueue();">Enqueue</button>
 	    </div>
 	  </div>
 	</form>
@@ -45,7 +48,33 @@
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
     <script type="application/ecmascript">
 
+function updatePlaying() {
+  $.ajax(
+    { contentType: 'application/json'
+    , data: JSON.stringify( { "CurrentMetadata": {} } )
+    , success: function(data, stat, req) {
+      if ( data["title"]     ) { $("#title")    .text(data["title"]);     } else { $("#title")    .text("<missing>"); };
+      if ( data["artist"]    ) { $("#artist")   .text(data["artist"]);    } else { $("#artist")   .text("<missing>"); };
+      if ( data["album"]     ) { $("#album")    .text(data["album"]);     } else { $("#album")    .text("<missing>"); };
+      if ( data["filename"]  ) { $("#filename") .text(data["filename"]);  } else { $("#filename") .text("<missing>"); };
+      if ( data["remaining"] ) { $("#remaining").text(data["remaining"]); } else { $("#remaining").text("<missing>"); };
+    }
+    , type: 'POST'
+    , url: 'api/'
+  });
+}
 
+setInterval(updatePlaying, 5000);
+updatePlaying();
+
+function skip() {
+  $.ajax(
+    { contentType: 'application/json'
+    , data: JSON.stringify( { "SkipThisSong": {} } )
+    , type: 'POST'
+    , url: 'api/'
+  });
+}
 
     </script>
   </body>
