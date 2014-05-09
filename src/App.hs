@@ -56,6 +56,7 @@ app req = handle (\e -> return $ APIError $ show (e :: SomeException)) $ do
   sock <- socket AF_UNIX Stream 0
   connect sock $ SockAddrUnix "/srv/radio/run/socket"
   liquidSoap <- socketToHandle sock ReadWriteMode
+  hSetEncoding liquidSoap utf8
   hSetNewlineMode liquidSoap $ NewlineMode CRLF CRLF
 
   resp <- case req of
