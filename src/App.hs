@@ -125,7 +125,7 @@ readMap h = _rm M.empty
 	(break (== '=') -> (key,'=':'"':(break (== '"') -> (val,"\"")))) -> _rm $ M.insert key (importString val) m
 
 importString :: String -> String
-importString str = decodeString $ unescape str
+importString str = unescape str
   where
     unescape "" = ""
     unescape ('\\':cs) = toEnum (octalDigitsToInt $ take 3 cs) : unescape (drop 3 cs)
