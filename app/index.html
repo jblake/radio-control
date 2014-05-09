@@ -53,11 +53,14 @@ function updatePlaying() {
     { contentType: 'application/json'
     , data: JSON.stringify( { "CurrentMetadata": {} } )
     , success: function(data, stat, req) {
-      if ( data["title"]     ) { $("#title")    .text(data["title"]);     } else { $("#title")    .text("<missing>"); };
-      if ( data["artist"]    ) { $("#artist")   .text(data["artist"]);    } else { $("#artist")   .text("<missing>"); };
-      if ( data["album"]     ) { $("#album")    .text(data["album"]);     } else { $("#album")    .text("<missing>"); };
-      if ( data["filename"]  ) { $("#filename") .text(data["filename"]);  } else { $("#filename") .text("<missing>"); };
-      if ( data["remaining"] ) { $("#remaining").text(data["remaining"]); } else { $("#remaining").text("<missing>"); };
+      var now = data["NowPlaying"];
+      if (now) {
+	$("#album").text(now["album"]);
+	$("#artist").text(now["artist"]);
+	$("#filename").text(now["filename"]);
+	$("#remaining").text(now["remaining"]);
+	$("#title").text(now["title"]);
+      };
     }
     , type: 'POST'
     , url: 'api/'
