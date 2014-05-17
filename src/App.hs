@@ -75,7 +75,7 @@ app req = handle (\e -> return $ APIError $ show (e :: SomeException)) $ do
 	artist = M.findWithDefault "<unknown>" "artist" info
 	album = M.findWithDefault "<unknown>" "album" info
 
-      hPutStrLn liquidSoap "icecast.remaining"
+      hPutStrLn liquidSoap "buffer_6325.remaining"
       seconds <- read <$> hGetLine liquidSoap
       "END" <- hGetLine liquidSoap
 
