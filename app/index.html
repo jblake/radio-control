@@ -93,6 +93,7 @@ function skip() {
 }
 
 function enqueue(event) {
+  $("#enqueue").val("");
   $("#enqueue-btns").html("");
   $.ajax(
     { contentType: 'application/json'
