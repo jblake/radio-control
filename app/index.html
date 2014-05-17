@@ -1,9 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html manifest="cache.manifest">
   <head>
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.min.css" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+
+#title, #artist {
+  font-weight: bold;
+}
+
+#album {
+  font-style: italic;
+}
+
+#filename {
+  font-size: 0.75em;
+}
+
+    </style>
     <title>radio-control</title>
   </head>
   <body>
@@ -33,19 +49,16 @@
 	  <div class="form-group">
 	    <label for="enqueue" class="col-sm-2 control-label">Path</label>
 	    <div class="col-sm-10">
-	      <input type="text" class="form-control" id="enqueue" placeholder="ripped/Lemon_Jelly/02-Lemon_Jelly-Nervous_Tension.ogg" autocomplete="off" />
+	      <input type="text" class="form-control" id="enqueue" placeholder="ripped/Lemon_Jelly/02-Lemon_Jelly-Nervous_Tension.ogg" autocomplete="off" oninput="updateEnqueue();" />
 	    </div>
 	  </div>
-	  <div class="form-group">
-	    <div class="col-sm-offset-2 col-sm-10">
-	      <button type="button" class="btn btn-primary" onclick="enqueue();">Enqueue</button>
-	    </div>
+	  <div class="form-group" id="enqueue-btns">
 	  </div>
 	</form>
       </div>
     </div>
-    <script src="http://code.jquery.com/jquery-2.0.3.js"></script>
-    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+    <script src="//code.jquery.com/jquery-2.0.3.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
     <script type="application/ecmascript">
 
 function updatePlaying() {
@@ -77,6 +90,43 @@ function skip() {
     , type: 'POST'
     , url: 'api/'
   });
+}
+
+function enqueue(event) {
+  $("#enqueue-btns").html("");
+  $.ajax(
+    { contentType: 'application/json'
+    , data: JSON.stringify( { "AddToQueue": { "path": event.data } } )
+    , type: 'POST'
+    , url: 'api/'
+  });
+}
+
+function updateEnqueue() {
+  if ($("#enqueue").val() == "") {
+    $("#enqueue-btns").html("");
+  } else {
+    $.ajax(
+      { contentType: 'application/json'
+      , data: JSON.stringify( { "SongsMatching": { "subpath": $("#enqueue").val() } } )
+      , success: function(data, stat, req) {
+	$("#enqueue-btns").html("");
+	data["SearchResults"]["paths"].forEach(function(path){
+	  var btn = $("<button />", {
+	    "type": "button",
+	    "class": "btn",
+	    "text": path });
+	  $(btn).on("click", null, path, enqueue);
+	  var div = $("<div />", {
+	    "class": "col-sm-offset-2 col-sm-10" });
+	  $(div).append(btn);
+	  $("#enqueue-btns").append(div);
+	});
+      }
+      , type: 'POST'
+      , url: 'api/'
+    });
+  };
 }
 
     </script>
